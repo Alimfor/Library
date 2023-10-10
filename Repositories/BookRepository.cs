@@ -41,7 +41,7 @@ namespace Library.Repositories
             }
         }
 
-        public int GetBookIdByNameAndAuthorNameAndCategoryName(string bookName, string authorName, string categoryName)
+        public int GetBookIdByBookDetails(string bookName, string authorName, string categoryName)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Library.Repositories
             {
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("conStr")))
                 {
-                    return connection.Query<Book>("pGetAllOrOneBook", commandType: CommandType.StoredProcedure).ToList();
+                    return connection.Query<Book>("pGetAllOrOneBook", new {id = 0}, commandType: CommandType.StoredProcedure).ToList();
                 }
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace Library.Repositories
             {
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("conStr")))
                 {
-                    return (Book) connection.Query<Book>("pGetAllOrOneBook",new { id }, commandType: CommandType.StoredProcedure);
+                    return connection.Query<Book>("pGetAllOrOneBook",new { id }, commandType: CommandType.StoredProcedure).FirstOrDefault();
                 }
             }
             catch (Exception ex)
@@ -119,10 +119,14 @@ namespace Library.Repositories
                     };
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                return new Result
+                {
+                    error = ex.Message,
+                    code = 500,
+                    status = Status.WRONG_REQUEST
+                };
             }
         }
 

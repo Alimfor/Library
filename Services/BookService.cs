@@ -41,7 +41,7 @@ namespace Library.Services
         
         private int GetBookId(string bookName, string authorName, string categoryName)
         {
-            return _bookRepository.GetBookIdByNameAndAuthorNameAndCategoryName(bookName, authorName, categoryName);
+            return _bookRepository.GetBookIdByBookDetails(bookName, authorName, categoryName);
         }
     }
 }

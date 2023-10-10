@@ -10,6 +10,6 @@ namespace Library.Repositories
         Result SaveBook(Book book);
         Result UpdateBook(Book book);
         Result DeleteBook(int id);
-        int GetBookIdByNameAndAuthorNameAndCategoryName(string bookName, string authorName, string categoryName);
+        int GetBookIdByBookDetails(string bookName, string authorName, string categoryName);
     }
 }

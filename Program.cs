@@ -4,19 +4,31 @@ using Library.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddSingleton<IBookRepository, BookRepository>();
-builder.Services.AddSingleton<IAuthorRepository, AuthorRepository>();
-builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();
-builder.Services.AddSingleton<BookService>();
-builder.Services.AddSingleton<AuthorService>();
-builder.Services.AddSingleton<CategoryService>();
-
 builder.Services.AddControllers();
+
+builder.Services.AddTransient<BookService>();
+builder.Services.AddTransient<AuthorService>();
+builder.Services.AddTransient<CategoryService>();
+
+builder.Services.AddTransient<BookRepository>();
+builder.Services.AddTransient<AuthorRepository>();
+builder.Services.AddTransient<CategoryRepository>();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
@@ -30,5 +42,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors();
 
 app.Run();

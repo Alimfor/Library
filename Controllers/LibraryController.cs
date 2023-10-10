@@ -15,11 +15,11 @@ namespace Library.Controllers
         private readonly AuthorService _authorService;
         private readonly CategoryService _categoryService;
 
-		private readonly string GET_ALL_BOOKS = "all";
-		private readonly string GET_BOOK_BY_ID = "book";
-		private readonly string GET_ALL_BOOKS = "all";
-		private readonly string GET_ALL_BOOKS = "all";
-		private readonly string GET_ALL_BOOKS = "all";
+		private const string GET_ALL_BOOKS = "all";
+		private const string GET_BOOK_BY_ID = "book/{id}";
+		private const string POST_SAVE_BOOK = "new";
+		private const string POST_UPDATE = "edit";
+		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
 
         public LibraryController(BookService bookService, CategoryService categoryService, AuthorService authorService)
         {
@@ -28,18 +28,23 @@ namespace Library.Controllers
 	        _authorService = authorService;
         }
 
+        [Route(GET_ALL_BOOKS)]
         public List<BookDTO> GetAllBooks()
         {
 	        var books = _bookService.GetAllBooks();
 	        return books.Select(FromBookToBookDTO).ToList();
         }
 
-        public BookDTO GetBookById(int id)
+		[Route(GET_BOOK_BY_ID)]
+		public BookDTO GetBookById(int id)
         {
-            return FromBookToBookDTO(_bookService.GetBookById(id));
+			Book book = _bookService.GetBookById(id);
+
+			return book == null ? null
+								: FromBookToBookDTO(book);
         }
 
-        [HttpPost]
+        [HttpPost,Route(POST_SAVE_BOOK)]
         public string AddBook(BookDTO bookDto)
         {
 	        Result result = _bookService.SaveBook(FromBookDtoToBook(bookDto));
@@ -47,7 +52,7 @@ namespace Library.Controllers
 	        return result.code == 200 ? "Successful" : "Wrong request";
         }
 
-        [HttpPatch]
+        [HttpPatch,Route(POST_UPDATE)]
         public string UpdateBook(BookDTO bookDto)
         {
 	        Result result = _bookService.UpdateBook(FromBookDtoToBook(bookDto));
@@ -55,10 +60,10 @@ namespace Library.Controllers
 	        return result.code == 200 ? "Successful" : "Wrong request";
         }
 
-        [HttpDelete]
-        public string DeleteBook(string bookName, string authorName, string categoryName)
+        [HttpDelete,Route(DELETE_BOOK_BY_BOOK_DETAILS)]
+        public string DeleteBook(BookDetails bookDetails)
         {
-	        Result result = _bookService.DeleteBook(bookName, authorName, categoryName);
+	        Result result = _bookService.DeleteBook(bookDetails.bookName, bookDetails.authorName, bookDetails.categoryName);
 	        return result.code == 200 ? "Successful" : "Wrong request";
         }
         
@@ -133,7 +138,7 @@ CREATE PROC pGetAllOrOneBook
 @id INT
 AS
 BEGIN
-	IF @id IS NOT NULL
+	IF @id <> 0
 	BEGIN
 		SELECT *
 		FROM book

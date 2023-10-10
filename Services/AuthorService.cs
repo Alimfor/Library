@@ -21,6 +21,4 @@ public class AuthorService
     {
         return _authorRepository.GetAuthorIdByFirstAndLastName(firstName,lastName);
     }
-
-
 }

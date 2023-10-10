@@ -16,10 +16,10 @@ namespace Library.Controllers
             _authorService = authorService;
         }
 
-        [HttpPost]
-        public string CreateAuthor(AuthorDTO authorDTO)
-        {
-            Result result = _authorService.
-        }
+        //[HttpPost]
+        //public string CreateAuthor(AuthorDTO authorDTO)
+        //{
+        //    Result result = _authorService.
+        //}
     }
 }

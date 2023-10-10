@@ -42,7 +42,8 @@ public class AuthorRepository : IAuthorRepository
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("conStr")))
             {
-                return connection.Query("pGetAuthorIdByFirstAndLastName", new { firstName, lastName}, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                int? authorId = connection.Query("pGetAuthorIdByFirstAndLastName", new { firstName, lastName}, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return authorId ?? 0;
             }
         }
         catch (Exception e)
