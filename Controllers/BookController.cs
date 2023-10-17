@@ -1,4 +1,5 @@
-﻿using Library.DTO;
+﻿using library.Models;
+using Library.DTO;
 using Library.Models;
 using Library.Services;
 using Library.Utils;
@@ -7,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
 {
-    [Route("api/library")]
+    [Route("api/book")]
     [ApiController]
-    public class LibraryController : ControllerBase
+    public class BookController : ControllerBase
     {
         private readonly BookService _bookService;
         private readonly AuthorService _authorService;
@@ -17,11 +18,12 @@ namespace Library.Controllers
 
 		private const string GET_ALL_BOOKS = "all";
 		private const string GET_BOOK_BY_ID = "book/{id}";
+		private const string GET_CATEGORY_LIST_SELECT = "category_select";
 		private const string POST_SAVE_BOOK = "new";
 		private const string POST_UPDATE_BOOK = "edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
 
-        public LibraryController(BookService bookService, CategoryService categoryService, AuthorService authorService)
+        public BookController(BookService bookService, CategoryService categoryService, AuthorService authorService)
         {
 	        _bookService = bookService;
 	        _categoryService = categoryService;
@@ -42,6 +44,14 @@ namespace Library.Controllers
 
 			return FromBookToBookDTO(book);
         }
+
+
+
+        [Route(GET_CATEGORY_LIST_SELECT)]
+		public IActionResult CategorySelect()
+        {
+			return Ok(_categoryService.CategorySelect());
+		}
 
         [HttpPost,Route(POST_SAVE_BOOK)]
         public string AddBook(BookDTO bookDto)
@@ -327,5 +337,21 @@ BEGIN
 	FROM book b JOIN author a
 	ON b.author_id = a.author_id JOIN category c
 	ON b.category_id = c.category_id
+END
+
+CREATE PROC pAuthorSelect
+AS
+BEGIN
+	SELECT author_id,first_name + ' ' + last_name name
+	FROM author
+	ORDER BY 2
+END;
+
+CREATE PROC pCategorySelect
+AS
+BEGIN
+	SELECT category_id, name
+	FROM category
+	ORDER BY 2
 END
  */

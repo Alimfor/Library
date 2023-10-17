@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using library.Models;
+using Library.Models;
 using Library.Repositories;
 using Library.Utils;
 
@@ -42,5 +43,10 @@ public class AuthorService
     public Result DeleteAuthorById(int id)
     {
         return _authorRepository.DeleteAuthorById(id);
+    }
+
+    public IEnumerable<ListSelect> AuthorSelect()
+    {
+        return _authorRepository.AuthorSelect();
     }
 }

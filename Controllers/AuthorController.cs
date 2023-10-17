@@ -15,6 +15,7 @@ namespace Library.Controllers
 
         private const string GET_ALL_AUTHORS = "all";
         private const string GET_AUTHOR_BY_ID = "{id}";
+        private const string GET_AUTHOR_LIST_SELECT = "authors_select";
         private const string POST_SAVE_AUTHOR = "new";
         private const string PUT_UPDATE_AUTHOR = "edit";
         private const string DELETE_AUTHOR_BY_ID = "delete";
@@ -39,6 +40,12 @@ namespace Library.Controllers
             return authorDto == null
                 ? BadRequest("Sent id is wrong")
                 : Ok(authorDto);
+        }
+
+        [Route(GET_AUTHOR_LIST_SELECT)]
+        public IActionResult AuthorSelect()
+        {
+            return Ok(_authorService.AuthorSelect());
         }
 
         [HttpPost, Route(POST_SAVE_AUTHOR)]

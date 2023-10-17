@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using library.Models;
+using Library.Models;
 using Library.Utils;
 
 namespace Library.Repositories;
@@ -11,5 +12,5 @@ public interface IAuthorRepository
     Result SaveAuthor(Author author);
     Result UpdateAuthor(Author author);
     Result DeleteAuthorById(int id);
-
+    List<ListSelect> AuthorSelect();
 }

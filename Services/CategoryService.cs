@@ -1,4 +1,5 @@
-﻿using Library.Models;
+﻿using library.Models;
+using Library.Models;
 using Library.Repositories;
 
 namespace Library.Services;
@@ -20,5 +21,10 @@ public class CategoryService
     public int GetCategoryIdByName(string categoryName)
     {
         return 0;
+    }
+
+    public List<ListSelect> CategorySelect()
+    {
+        return _categoryRepository.CategorySelect();
     }
 }

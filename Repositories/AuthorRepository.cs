@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using Dapper;
+using library.Models;
 using Library.Models;
 using Library.Utils;
 
@@ -143,5 +144,10 @@ public class AuthorRepository : IAuthorRepository
                 status = Status.SUCCESSFUL
             };
         }
+    }
+    public List<ListSelect> AuthorSelect()
+    {
+        using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+        return connection.Query<ListSelect>("pAuthorSelect", commandType: CommandType.StoredProcedure).ToList();
     }
 }

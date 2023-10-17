@@ -3,6 +3,7 @@ using Library.Utils;
 using System.Data;
 using System.Data.SqlClient;
 using Dapper;
+using library.Models;
 
 namespace Library.Repositories
 {
