@@ -15,19 +15,27 @@ public class AuthorRepository : IAuthorRepository
         _configuration = configuration;
     }
 
-    public Result DeleteAuthor(Author author)
+    public List<Author> GetAllAuthors()
     {
-        throw new NotImplementedException();
+        try
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            return connection.Query<Author>("pGetAllOrOneAuthor", new { id = 0 },
+                commandType: CommandType.StoredProcedure).ToList();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public Author GetAuthorById(int id)
     {
         try
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("conStr")))
-            {
-                return (Author) connection.Query("pGetAllOrOneAuthor", new { id }, commandType: CommandType.StoredProcedure);
-            }
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            return (Author) connection.Query("pGetAllOrOneAuthor", new { id }, commandType: CommandType.StoredProcedure);
         }
         catch (Exception e)
         {
@@ -40,11 +48,9 @@ public class AuthorRepository : IAuthorRepository
     {
         try
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("conStr")))
-            {
-                int? authorId = connection.Query("pGetAuthorIdByFirstAndLastName", new { firstName, lastName}, commandType: CommandType.StoredProcedure).FirstOrDefault();
-                return authorId ?? 0;
-            }
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            int? authorId = connection.Query("pGetAuthorIdByFirstAndLastName", new { firstName, lastName}, commandType: CommandType.StoredProcedure).FirstOrDefault();
+            return authorId ?? 0;
         }
         catch (Exception e)
         {
@@ -55,11 +61,87 @@ public class AuthorRepository : IAuthorRepository
 
     public Result SaveAuthor(Author author)
     {
-        throw new NotImplementedException();
+        try
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            string result = 
+                connection.ExecuteScalar<string>("pSaveAuthor",new {author.firstName,author.lastName},commandType: CommandType.StoredProcedure).ToUpper();
+            if (result.Equals(Status.SUCCESSFUL))
+            {
+                return new Result
+                {
+                    error = "none",
+                    code = 200,
+                    status = Status.SUCCESSFUL
+                };
+            }
+            return new Result
+            {
+                error = result,
+                code = 500,
+                status = Status.WRONG_REQUEST
+            };
+            
+        }
+        catch (Exception ex)
+        {
+            return new Result
+            {
+                error = ex.Message,
+                code = 500,
+                status = Status.WRONG_REQUEST
+            };
+        }
+        
     }
 
     public Result UpdateAuthor(Author author)
     {
-        throw new NotImplementedException();
+        try
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            connection.Execute("pUpdateAuthor", new { author.authorId, author.firstName, author.lastName },
+                commandType: CommandType.StoredProcedure);
+
+            return new Result
+            {
+                error = "none",
+                code = 200,
+                status = Status.SUCCESSFUL
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Result
+            {
+                error = ex.Message,
+                code = 500,
+                status = Status.WRONG_REQUEST
+            };
+        }
+    }
+
+    public Result DeleteAuthorById(int id)
+    {
+        try
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
+            connection.Execute("pDeleteBook", new { id }, commandType: CommandType.StoredProcedure);
+            return new Result
+            {
+                error = "none",
+                code = 200,
+                status = Status.SUCCESSFUL
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Result
+            {
+                error = ex.Message,
+                code = 500,
+                status = Status.SUCCESSFUL
+            };
+        }
     }
 }

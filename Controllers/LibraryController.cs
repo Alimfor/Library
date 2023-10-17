@@ -18,7 +18,7 @@ namespace Library.Controllers
 		private const string GET_ALL_BOOKS = "all";
 		private const string GET_BOOK_BY_ID = "book/{id}";
 		private const string POST_SAVE_BOOK = "new";
-		private const string POST_UPDATE = "edit";
+		private const string POST_UPDATE_BOOK = "edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
 
         public LibraryController(BookService bookService, CategoryService categoryService, AuthorService authorService)
@@ -40,8 +40,7 @@ namespace Library.Controllers
         {
 			Book book = _bookService.GetBookById(id);
 
-			return book == null ? null
-								: FromBookToBookDTO(book);
+			return FromBookToBookDTO(book);
         }
 
         [HttpPost,Route(POST_SAVE_BOOK)]
@@ -52,7 +51,7 @@ namespace Library.Controllers
 	        return result.code == 200 ? "Successful" : "Wrong request";
         }
 
-        [HttpPatch,Route(POST_UPDATE)]
+        [HttpPatch,Route(POST_UPDATE_BOOK)]
         public string UpdateBook(BookDTO bookDto)
         {
 	        Result result = _bookService.UpdateBook(FromBookDtoToBook(bookDto));
@@ -69,6 +68,9 @@ namespace Library.Controllers
         
         private BookDTO FromBookToBookDTO(Book book)
         {
+	        if (book == null)
+		        return null;
+	        
 	        var authorDto = FromAuthorToAthorDTO(_authorService.GetAuthorById(book.authorId));
 	        var categoryDto = FromCategoryToCategoryDTO(_categoryService.GetCategoryById(book.categoryId));
 	        return new BookDTO()
@@ -82,6 +84,9 @@ namespace Library.Controllers
 
         private Book FromBookDtoToBook(BookDTO bookDto)
         {
+	        if (bookDto == null)
+		        return null;
+	        
 	        int authorId =
 		        _authorService.GetAuthorId(bookDto.author.firstName, bookDto.author.lastName);
 	        int categoryId = _categoryService.GetCategoryIdByName(bookDto.category.name);
@@ -96,6 +101,9 @@ namespace Library.Controllers
 
         private AuthorDTO FromAuthorToAthorDTO(Author author)
         {
+	        if (author == null)
+		        return null;
+	        
 	        return new AuthorDTO()
 	        {
 		        firstName = author.firstName,
@@ -105,6 +113,9 @@ namespace Library.Controllers
 
         private CategoryDTO FromCategoryToCategoryDTO(Category category)
         {
+	        if (category == null)
+		        return null;
+	        
 	        return new CategoryDTO()
 	        {
 		        name = category.name
