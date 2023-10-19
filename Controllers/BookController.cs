@@ -15,7 +15,7 @@ namespace Library.Controllers
         private readonly CategoryService _categoryService;
 
 		private const string GET_ALL_BOOKS = "all";
-		private const string GET_BOOK_BY_ID = "book/{id}";
+		private const string GET_BOOK_BY_ID = "{id}";
 		private const string POST_SAVE_BOOK = "new";
 		private const string PUT_UPDATE_BOOK = "edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
@@ -96,8 +96,8 @@ namespace Library.Controllers
 	        
 	        var result = _bookService.SaveBook(bookDto.ToBook(authorId,categoryId));
 
-	        return ResultState<>(result,null);
-        }
+	        return ResultState<object>(result, null);
+		}
 
         [HttpPut,Route(PUT_UPDATE_BOOK)]
         public IActionResult UpdateBook(BookDTO? bookDto)
@@ -120,8 +120,8 @@ namespace Library.Controllers
 	        
 	        var result = _bookService.UpdateBook(bookDto.ToBook(authorId,categoryId));
 	        
-	        return ResultState<>(result,null);
-        }
+	        return ResultState<object>(result, null);
+		}
 
         [HttpDelete,Route(DELETE_BOOK_BY_BOOK_DETAILS)]
         public IActionResult DeleteBook(BookDetails bookDetails)
@@ -129,11 +129,11 @@ namespace Library.Controllers
 	        var result = _bookService.DeleteBook(
 		        bookDetails.bookName, bookDetails.authorName, bookDetails.categoryName
 		        );
-	        
-	        return ResultState<>(result,null);
+
+			return ResultState<object>(result, null);
         }
         
-        private IActionResult ResultState<T>(Result result,T data)
+        private IActionResult ResultState<T>(Result result,T? data)
         {
 	        return result.code switch
 	        {
@@ -349,6 +349,16 @@ BEGIN
 	FROM book b JOIN author a
 	ON b.author_id = a.author_id JOIN category c
 	ON b.category_id = c.category_id
+END
+
+CREATE PROC pGetAuthorIdByFirstAndLastName
+@firstName NVARCHAR(20),
+@lastName NVARCHAR(20)
+AS
+BEGIN
+	SELECT author_id
+	FROM author
+	WHERE first_name LIKE @firstName AND last_name LIKE @lastName
 END
 
 CREATE PROC pAuthorSelect

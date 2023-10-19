@@ -65,7 +65,7 @@ namespace Library.Controllers
         {
             var result = _authorService.SaveAuthor(authorDto.ToAuthor());
             
-            return ResultState<>(result,null);
+            return ResultState<object>(result, null);
         }
 
         [HttpPut, Route(PUT_UPDATE_AUTHOR)]
@@ -73,7 +73,7 @@ namespace Library.Controllers
         {
             var result = _authorService.UpdateAuthor(authorDto.ToAuthor());
             
-            return ResultState<>(result,null);
+            return ResultState<object>(result, null);
         }
 
         [HttpDelete, Route(DELETE_AUTHOR_BY_ID)]
@@ -81,10 +81,10 @@ namespace Library.Controllers
         {
             var result = _authorService.DeleteAuthorById(id);
 
-            return ResultState<>(result,null);
+            return ResultState<object>(result, null);
         }
 
-        private IActionResult ResultState<T>(Result result,T data)
+        private IActionResult ResultState<T>(Result result,T? data)
         {
             return result.code switch
             {

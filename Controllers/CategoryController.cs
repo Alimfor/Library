@@ -65,26 +65,26 @@ namespace Library.Controllers;
         {
             var result = _categoryService.SaveCategory(categoryDto.ToCategory());
             
-            return ResultState<>(result,null);
-        }
+            return ResultState<object>(result, null);
+    }
 
         [HttpPut, Route(PUT_UPDATE_CATEGORY)]
         public IActionResult UpdateCategory(CategoryDTO categoryDto)
         {
             var result = _categoryService.UpdateCategory(categoryDto.ToCategory());
             
-            return ResultState<>(result,null);
-        }
+            return ResultState<object>(result, null);
+    }
 
         [HttpDelete, Route(DELETE_CATEGORY_BY_ID)]
         public IActionResult DeleteCategoryById(int id)
         {
             var result = _categoryService.DeleteCategoryById(id);
 
-            return ResultState<>(result,null);
-        }
+            return ResultState<object>(result, null);
+    }
 
-        private IActionResult ResultState<T>(Result result,T data)
+        private IActionResult ResultState<T>(Result result,T? data)
         {
             return result.code switch
             {
