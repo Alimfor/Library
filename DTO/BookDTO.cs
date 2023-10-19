@@ -4,8 +4,8 @@ namespace Library.DTO;
 
 public class BookDTO
 {
-    public string title { get; set; }
-    public int year { get; set; }
-    public AuthorDTO author { get; set; }
-    public CategoryDTO category { get; set; }
+    public string title { get; init; }
+    public int year { get; init; }
+    public AuthorDTO author { get; init; }
+    public CategoryDTO category { get; init; }
 }

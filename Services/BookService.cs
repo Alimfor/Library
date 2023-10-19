@@ -6,19 +6,19 @@ namespace Library.Services
 {
     public class BookService
     {
-        private BookRepository _bookRepository;
+        private readonly BookRepository _bookRepository;
 
         public BookService(BookRepository bookRepository)
         {
             _bookRepository = bookRepository;
         }
 
-        public List<Book> GetAllBooks()
+        public OperationResult<IEnumerable<Book>> GetAllBooks()
         {
             return _bookRepository.GetAllBooks();
         }
 
-        public Book GetBookById(int id)
+        public OperationResult<Book> GetBookById(int id)
         {
             return _bookRepository.GetBookById(id);
         }
@@ -35,11 +35,11 @@ namespace Library.Services
 
         public Result DeleteBook(string bookName, string authorName, string categoryName)
         {
-             int bookId = GetBookId(bookName, authorName, categoryName);
-             return _bookRepository.DeleteBook(bookId);
+             var bookId = GetBookId(bookName, authorName, categoryName);
+             return _bookRepository.DeleteBookById(bookId.data);
         }
         
-        private int GetBookId(string bookName, string authorName, string categoryName)
+        private OperationResult<int> GetBookId(string bookName, string authorName, string categoryName)
         {
             return _bookRepository.GetBookIdByBookDetails(bookName, authorName, categoryName);
         }

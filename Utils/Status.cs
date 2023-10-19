@@ -3,6 +3,7 @@
     public enum Status
     {
         SUCCESSFUL,
-        WRONG_REQUEST
+        WRONG_REQUEST,
+        ERROR
     }
 }

@@ -1,9 +1,7 @@
-﻿using library.Models;
-using Library.DTO;
+﻿using Library.DTO;
 using Library.Models;
 using Library.Services;
 using Library.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -18,9 +16,8 @@ namespace Library.Controllers
 
 		private const string GET_ALL_BOOKS = "all";
 		private const string GET_BOOK_BY_ID = "book/{id}";
-		private const string GET_CATEGORY_LIST_SELECT = "category_select";
 		private const string POST_SAVE_BOOK = "new";
-		private const string POST_UPDATE_BOOK = "edit";
+		private const string PUT_UPDATE_BOOK = "edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
 
         public BookController(BookService bookService, CategoryService categoryService, AuthorService authorService)
@@ -31,104 +28,119 @@ namespace Library.Controllers
         }
 
         [Route(GET_ALL_BOOKS)]
-        public List<BookDTO> GetAllBooks()
+        public IActionResult GetAllBooks()
         {
-	        var books = _bookService.GetAllBooks();
-	        return books.Select(FromBookToBookDTO).ToList();
+	        var operationResult = _bookService.GetAllBooks();
+	        var result = operationResult.result;
+	        var books = operationResult.data;
+
+	        if (!books.Any() && result.code == 200)
+	        {
+		        return Ok(Enumerable.Empty<Book>());
+	        }
+
+	        var operationResults  = books.Select(book => book
+		        .ToBookDto(_authorService, _categoryService)
+	        );
+
+	        var results = operationResults.Select(operateResult => operateResult.result);
+	        var bookDtos = operationResults.Select(operateResult => operateResult.data);
+
+	        var hasNoOne200Code = results.Any(res => res.code != 200);
+
+	        return hasNoOne200Code 
+		        ? StatusCode(500, "Internal Server Error") 
+		        : ResultState(result,bookDtos);
         }
 
 		[Route(GET_BOOK_BY_ID)]
-		public BookDTO GetBookById(int id)
+		public IActionResult GetBookById(int id)
         {
-			Book book = _bookService.GetBookById(id);
+			var bookOperationResult = _bookService.GetBookById(id);
+			var result = bookOperationResult.result;
+			var book = bookOperationResult.data;
 
-			return FromBookToBookDTO(book);
+			if (result.code == 400)
+				return StatusCode(result.code, result.message);
+
+			var operationResult = book.ToBookDto(_authorService, _categoryService);
+
+			var results = operationResult.result;
+			var bookDto = operationResult.data;
+
+			var hasNoOne200Code = results.code != 200;
+
+			return hasNoOne200Code 
+				? StatusCode(500, "Internal Server Error") 
+				: ResultState(result,bookDto);
         }
-
-
-
-        [Route(GET_CATEGORY_LIST_SELECT)]
-		public IActionResult CategorySelect()
-        {
-			return Ok(_categoryService.CategorySelect());
-		}
 
         [HttpPost,Route(POST_SAVE_BOOK)]
-        public string AddBook(BookDTO bookDto)
+        public IActionResult AddBook(BookDTO? bookDto)
         {
-	        Result result = _bookService.SaveBook(FromBookDtoToBook(bookDto));
+	        if (bookDto == null)
+		        return StatusCode(400, "wrong request!");
+	        
+	        var authorOperationResult =  _authorService.GetAuthorId(bookDto.author.firstName, bookDto.author.lastName);
+	        var categoryOperationResult = _categoryService.GetCategoryIdByName(bookDto.category.name);
+	        var authorResult = authorOperationResult.result;
+	        var categoryResult = categoryOperationResult.result;
 
-	        return result.code == 200 ? "Successful" : "Wrong request";
+	        if (authorResult.code != 200)
+		        return StatusCode(authorResult.code, authorResult.message);
+	        if (categoryResult.code != 200)
+		        return StatusCode(categoryResult.code, categoryResult.message);
+	        
+	        var authorId = authorOperationResult.data;
+	        var categoryId = categoryOperationResult.data;
+	        
+	        var result = _bookService.SaveBook(bookDto.ToBook(authorId,categoryId));
+
+	        return ResultState<>(result,null);
         }
 
-        [HttpPatch,Route(POST_UPDATE_BOOK)]
-        public string UpdateBook(BookDTO bookDto)
+        [HttpPut,Route(PUT_UPDATE_BOOK)]
+        public IActionResult UpdateBook(BookDTO? bookDto)
         {
-	        Result result = _bookService.UpdateBook(FromBookDtoToBook(bookDto));
+	        if (bookDto == null)
+		        return StatusCode(400, "wrong request!");
 	        
-	        return result.code == 200 ? "Successful" : "Wrong request";
+	        var authorOperationResult =  _authorService.GetAuthorId(bookDto.author.firstName, bookDto.author.lastName);
+	        var categoryOperationResult = _categoryService.GetCategoryIdByName(bookDto.category.name);
+	        var authorResult = authorOperationResult.result;
+	        var categoryResult = categoryOperationResult.result;
+
+	        if (authorResult.code != 200)
+		        return StatusCode(authorResult.code, authorResult.message);
+	        if (categoryResult.code != 200)
+		        return StatusCode(categoryResult.code, categoryResult.message);
+	        
+	        var authorId = authorOperationResult.data;
+	        var categoryId = categoryOperationResult.data;
+	        
+	        var result = _bookService.UpdateBook(bookDto.ToBook(authorId,categoryId));
+	        
+	        return ResultState<>(result,null);
         }
 
         [HttpDelete,Route(DELETE_BOOK_BY_BOOK_DETAILS)]
-        public string DeleteBook(BookDetails bookDetails)
+        public IActionResult DeleteBook(BookDetails bookDetails)
         {
-	        Result result = _bookService.DeleteBook(bookDetails.bookName, bookDetails.authorName, bookDetails.categoryName);
-	        return result.code == 200 ? "Successful" : "Wrong request";
+	        var result = _bookService.DeleteBook(
+		        bookDetails.bookName, bookDetails.authorName, bookDetails.categoryName
+		        );
+	        
+	        return ResultState<>(result,null);
         }
         
-        private BookDTO FromBookToBookDTO(Book book)
+        private IActionResult ResultState<T>(Result result,T data)
         {
-	        if (book == null)
-		        return null;
-	        
-	        var authorDto = FromAuthorToAthorDTO(_authorService.GetAuthorById(book.authorId));
-	        var categoryDto = FromCategoryToCategoryDTO(_categoryService.GetCategoryById(book.categoryId));
-	        return new BookDTO()
+	        return result.code switch
 	        {
-		        title = book.title,
-		        year = book.year,
-		        author = authorDto,
-		        category = categoryDto
-	        };
-        }
-
-        private Book FromBookDtoToBook(BookDTO bookDto)
-        {
-	        if (bookDto == null)
-		        return null;
-	        
-	        int authorId =
-		        _authorService.GetAuthorId(bookDto.author.firstName, bookDto.author.lastName);
-	        int categoryId = _categoryService.GetCategoryIdByName(bookDto.category.name);
-	        return new Book()
-	        {
-		        title = bookDto.title,
-		        year = bookDto.year,
-		        authorId = authorId,
-		        categoryId = categoryId
-	        };
-        }
-
-        private AuthorDTO FromAuthorToAthorDTO(Author author)
-        {
-	        if (author == null)
-		        return null;
-	        
-	        return new AuthorDTO()
-	        {
-		        firstName = author.firstName,
-		        lastName = author.lastName
-	        };
-        }
-
-        private CategoryDTO FromCategoryToCategoryDTO(Category category)
-        {
-	        if (category == null)
-		        return null;
-	        
-	        return new CategoryDTO()
-	        {
-		        name = category.name
+		        200 => Ok(data == null ? result.message : data),
+		        400 => BadRequest(result.message),
+		        500 => StatusCode(500, result.message),
+		        _ => StatusCode(result.code, result.message)
 	        };
         }
     }
@@ -299,7 +311,7 @@ AS
 BEGIN
 	IF @name IS NULL
 	BEGIN
-		SELECT 'Wrong reques'
+		SELECT 'Wrong request'
 		RETURN
 	END
 

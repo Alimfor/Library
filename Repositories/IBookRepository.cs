@@ -1,16 +1,15 @@
-﻿using library.Models;
-using Library.Models;
+﻿using Library.Models;
 using Library.Utils;
 
 namespace Library.Repositories
 {
     public interface IBookRepository
     {
-        List<Book> GetAllBooks();
-        Book GetBookById(int id);
+        OperationResult<IEnumerable<Book>> GetAllBooks();
+        OperationResult<Book> GetBookById(int id);
+        OperationResult<int> GetBookIdByBookDetails(string bookName, string authorName, string categoryName);
         Result SaveBook(Book book);
         Result UpdateBook(Book book);
-        Result DeleteBook(int id);
-        int GetBookIdByBookDetails(string bookName, string authorName, string categoryName);
+        Result DeleteBookById(int id);
     }
 }

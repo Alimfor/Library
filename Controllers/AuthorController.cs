@@ -2,7 +2,6 @@
 using Library.Models;
 using Library.Services;
 using Library.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Controllers
@@ -19,83 +18,80 @@ namespace Library.Controllers
         private const string POST_SAVE_AUTHOR = "new";
         private const string PUT_UPDATE_AUTHOR = "edit";
         private const string DELETE_AUTHOR_BY_ID = "delete";
+        
         public AuthorController(AuthorService authorService)
         {
             _authorService = authorService;
         }
 
         [Route(GET_ALL_AUTHORS)]
-        public List<AuthorDTO> GetAllAuthors()
+        public IActionResult GetAllAuthors()
         {
-            var authors = _authorService.GetAllAuthors();
-            return authors.Select(FromAuthorToAuthorDto).ToList();
+            var operationResult = _authorService.GetAllAuthors();
+            var result = operationResult.result;
+            var authors = operationResult.data;
+
+            if (!authors.Any() && result.code == 200)
+                return Ok(Enumerable.Empty<Author>());
+
+            var authorsDto = authors.Select(author => author.ToAuthorDto());
+            return ResultState(result,authorsDto);
         }
 
         [Route(GET_AUTHOR_BY_ID)]
         public IActionResult GetAuthorById(int id)
         {
-            Author author = _authorService.GetAuthorById(id);
-            AuthorDTO authorDto = FromAuthorToAuthorDto(author);
+            var operationResult = _authorService.GetAuthorById(id);
+            var result = operationResult.result;
+            if (result.code != 200)
+                return StatusCode(result.code, result.message);
             
-            return authorDto == null
-                ? BadRequest("Sent id is wrong")
-                : Ok(authorDto);
+            var authorDto = operationResult.data.ToAuthorDto();
+            return ResultState(result,authorDto);
         }
 
         [Route(GET_AUTHOR_LIST_SELECT)]
         public IActionResult AuthorSelect()
         {
-            return Ok(_authorService.AuthorSelect());
+            var operationResult = _authorService.AuthorSelect();
+            var result = operationResult.result;
+            var authorSelects = operationResult.data;
+            
+            return ResultState(result,authorSelects);
         }
 
         [HttpPost, Route(POST_SAVE_AUTHOR)]
         public IActionResult AddAuthor(AuthorDTO authorDto)
         {
-            Result result = _authorService.SaveAuthor(FromAuthorDtoToAuthor(authorDto));
-            return result.code == 200
-                ? Ok()
-                : BadRequest(result.error);
+            var result = _authorService.SaveAuthor(authorDto.ToAuthor());
+            
+            return ResultState<>(result,null);
         }
 
         [HttpPut, Route(PUT_UPDATE_AUTHOR)]
         public IActionResult UpdateAuthor(AuthorDTO authorDto)
         {
-            Result result = _authorService.UpdateAuthor(FromAuthorDtoToAuthor(authorDto));
-            return result.code == 200
-                ? Ok()
-                : BadRequest(result.error);
+            var result = _authorService.UpdateAuthor(authorDto.ToAuthor());
+            
+            return ResultState<>(result,null);
         }
 
         [HttpDelete, Route(DELETE_AUTHOR_BY_ID)]
         public IActionResult DeleteAuthorById(int id)
         {
-            Result result = _authorService.DeleteAuthorById(id);
-            return result.code == 200
-                ? Ok()
-                : BadRequest(result.error);
+            var result = _authorService.DeleteAuthorById(id);
+
+            return ResultState<>(result,null);
         }
 
-        private Author FromAuthorDtoToAuthor(AuthorDTO authorDto)
+        private IActionResult ResultState<T>(Result result,T data)
         {
-            if (authorDto == null)
-                return null;
-
-            return new Author()
+            return result.code switch
             {
-                firstName = authorDto.firstName,
-                lastName = authorDto.lastName
-            };
-        }
-        
-        private AuthorDTO FromAuthorToAuthorDto(Author author)
-        {
-            if (author == null)
-                return null;
-	        
-            return new AuthorDTO()
-            {
-                firstName = author.firstName,
-                lastName = author.lastName
+                200 => Ok(data == null ? result.message : data),
+                400 => BadRequest(result.message),
+                500 => StatusCode(500, result.message),
+                _ => StatusCode(result.code, result.message)
             };
         }
     }

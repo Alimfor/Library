@@ -6,11 +6,11 @@ namespace Library.Repositories;
 
 public interface IAuthorRepository
 {
-    List<Author> GetAllAuthors();
-    Author GetAuthorById(int id);
-    int GetAuthorIdByFirstAndLastName(string firstName, string lastName);
+    OperationResult<IEnumerable<Author>> GetAllAuthors();
+    OperationResult<Author> GetAuthorById(int id);
+    OperationResult<int> GetAuthorIdByFirstAndLastName(string firstName, string lastName);
+    OperationResult<IEnumerable<ListSelect>> AuthorSelect();
     Result SaveAuthor(Author author);
     Result UpdateAuthor(Author author);
     Result DeleteAuthorById(int id);
-    List<ListSelect> AuthorSelect();
 }

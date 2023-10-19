@@ -13,27 +13,26 @@ public class AuthorService
     {
         _authorRepository = authorRepository;
     }
-
-    public Author GetAuthorById(int id)
+    
+    public OperationResult<IEnumerable<Author>> GetAllAuthors()
+    {
+        return _authorRepository.GetAllAuthors();
+    }
+    
+    public OperationResult<Author> GetAuthorById(int id)
     {
         return _authorRepository.GetAuthorById(id);
     }
 
-    public int GetAuthorId(string firstName, string lastName)
+    public OperationResult<int> GetAuthorId(string firstName, string lastName)
     {
         return _authorRepository.GetAuthorIdByFirstAndLastName(firstName,lastName);
-    }
-
-    public List<Author> GetAllAuthors()
-    {
-        return _authorRepository.GetAllAuthors();
     }
 
     public Result SaveAuthor(Author newAuthor)
     {
         return _authorRepository.SaveAuthor(newAuthor);
     }
-
 
     public Result UpdateAuthor(Author updatedAuthor)
     {
@@ -45,7 +44,7 @@ public class AuthorService
         return _authorRepository.DeleteAuthorById(id);
     }
 
-    public IEnumerable<ListSelect> AuthorSelect()
+    public OperationResult<IEnumerable<ListSelect>> AuthorSelect()
     {
         return _authorRepository.AuthorSelect();
     }
