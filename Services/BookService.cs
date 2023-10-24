@@ -44,5 +44,10 @@ namespace Library.Services
         {
             return _bookRepository.GetBookIdByBookDetails(bookName, authorName, categoryName);
         }
+
+        public Result DeleteBook(int bookId)
+        {
+            return _bookRepository.DeleteBookById(bookId);
+        }
     }
 }

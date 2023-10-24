@@ -19,6 +19,7 @@ namespace Library.Controllers
 		private const string POST_SAVE_BOOK = "new";
 		private const string PUT_UPDATE_BOOK = "{id}/edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
+		private const string DELETE_BOOK_BY_ID = "{id}/delete";
 
         public BookController(BookService bookService, CategoryService categoryService, AuthorService authorService)
         {
@@ -129,6 +130,14 @@ namespace Library.Controllers
 	        var result = _bookService.DeleteBook(
 		        bookDetails.bookName, bookDetails.authorName, bookDetails.categoryName
 		        );
+
+			return ResultState<object>(result, null);
+        }
+        
+        [HttpDelete,Route(DELETE_BOOK_BY_ID)]
+        public IActionResult DeleteBook(int id)
+        {
+	        var result = _bookService.DeleteBook(id);
 
 			return ResultState<object>(result, null);
         }

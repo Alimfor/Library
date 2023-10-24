@@ -60,6 +60,9 @@
         //         console.log("error");
         //     }
         // });
+
+
+
 $(document).ready(function () {
 
     let requestFieldsTable = `
@@ -118,7 +121,6 @@ $(document).ready(function () {
     `;
 
 
-
     function findAllBooks() {
             let list = resonseTable;
         
@@ -127,18 +129,14 @@ $(document).ready(function () {
                 method: 'GET',
                 success: function(data) {
                     $.each(data, (i,item) => {
-                        // let bookData = {
-                        //     bookName: item.title,
-                        //     authorName: item.author.firstName,
-                        //     categoryName: item.category.name
-                        // };
-
-                        let edit  = "<button onclick='edit(" + (i + 1) + ")'>Edit</button>";
-                        let del = "<button onclick=del(" + {
+                        let bookData = {
                             bookName: item.title,
                             authorName: item.author.firstName,
                             categoryName: item.category.name
-                        }  + ")'>Delete</button>";
+                        };
+
+                        let edit  = "<button class='btn btn-primary' onclick='edit(" + 5 + ")'>Edit</button>";
+                        let del = "<button class='btn btn-primary' onclick='del(" + JSON.stringify(bookData) + ")'>Delete</button>";
     
                         list += `
                             <tr>
@@ -162,39 +160,52 @@ $(document).ready(function () {
             });
     }
 
-    function findBookById() {
+    function findBookById(id) {
             let book = resonseTable;
     
             let getBookById = 'http://localhost:5180/api/book/';
-            let id = $("#id-field").val();
+
+            if (id == null) {
+                id = $("#id-field").val();
+            }
     
             console.log(id);
-            $.ajax({
-                url: getBookById + id,
-                method: 'GET',
-                success: (data) => {
-                    let edit  = "<button onclick='edit(" + id + ")'>Edit</button>";
-                    let del = "<button onclick='del(" + 1 + ")'>Delete</button>";
-                    
-                    book += `
-                            <tr>
-                                 <td>` +  1 + `</td>` +
-                                `<td>` + data.title + `</td>` +
-                                `<td>` + data.year + `</td>` +
-                                `<td>` + data.author.firstName + " " + data.author.lastName + `</td>` +
-                                `<td>`+ data.category.name + `</td>`  +
-                                `<td>`+ edit + `</td>` +
-                                `<td>`+ del + `</td>` +
-                            `</tr>`;
-                    book += `</table>`;
-                    $("#response-container").html(book);
-                },
-            
-                error: (error) => {
-                    console.error('Произошла ошибка:', error);
-                }
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: getBookById + id,
+                    method: 'GET',
+                    success: (data) => {
+                        let bookData = {
+                            title: data.title,
+                            authorName: data.author.firstName,
+                            categoryName: data.category.name
+                        }
+
+                        let edit  = "<button class='btn btn-primary' onclick='edit(" + id + ")'>Edit</button>";
+                        let del = "<button class='btn btn-primary delete-button' data-book='" + JSON.stringify(bookData) + "'>Delete</button>";
+
+                        book += `
+                                <tr>
+                                     <td>` +  1 + `</td>` +
+                                    `<td>` + data.title + `</td>` +
+                                    `<td>` + data.year + `</td>` +
+                                    `<td>` + data.author.firstName + " " + data.author.lastName + `</td>` +
+                                    `<td>`+ data.category.name + `</td>`  +
+                                    `<td>`+ edit + `</td>` +
+                                    `<td>`+ del + `</td>` +
+                                `</tr>`;
+                        book += `</table>`;
+                        $("#response-container").html(book);
+
+                    },
+                
+                    error: (error) => {
+                        console.error('Произошла ошибка:', error);
+                    }
+                });
             });
     }
+
 
 
     $("#filling").click( () => {
@@ -206,57 +217,66 @@ $(document).ready(function () {
     }); 
 });
 
-    function del(bookData) {
-        $.confirm({
-            title: 'Are you sure to delete book!',
-            content: 'Deletion!',
-            buttons: {
-                confirm: function () {
-                    deleteBookById(bookData);
-                
-                },
-                cancel: function () {
-                    //$.alert('cancel delete!');
-                }            
-            }
-        });
-    }
-     
+function edit(id) {    
+    findBookById(id)
+        .then(function(data) {
+            $("#title").val(data.title);
+            $("#year").val(data.year);
+            $("#author-first-name").val(data.author.firstName);
+            $("#author-last-name").val(data.author.lastName);
+            $("#category-name").val(data.category.name);
     
-    function edit(id) {    
-       $("#exampleModal").modal("show");
-    }
-
-    function deleteBookById(bookData) {
-
-
-        $.ajax({
-            url: 'http://localhost:5180/api/book/delete',
-            method: 'DELETE',
-            data: bookData,
-            success: data => {
-                var message, modalClass;
-                message = "Операция выполнена успешно!";
-                modalClass = "modal-success";
-
-                $("#messageText").text(message);
-                $("#messageModal").addClass(modalClass);
-        
-                $("#messageModal").modal("show");
-            },
-            error: error => {
-                var message, modalClass;
-                message = "Произошла ошибка при выполнении операции.";
-                modalClass = "modal-error";
-
-                $("#messageText").text(message);
-                $("#messageModal").addClass(modalClass);
-        
-                $("#messageModal").modal("show");
-            }
+            $("#exampleModal").modal("show");
+        })
+        .catch(function(error) {
+            console.error('Произошла ошибка:', error);
         });
-    }
+}
 
+
+function del(bookData) {
+    $.confirm({
+        title: 'Are you sure to delete book!',
+        content: 'Deletion!',
+        buttons: {
+            confirm: function () {
+                deleteBookByDetails(bookData);
+            },
+            cancel: function () {
+                //$.alert('cancel delete!');
+            }            
+        }
+    });
+}
+ 
+
+
+function deleteBookByDetails(bookData) {
+    $.ajax({
+        url: 'http://localhost:5180/api/book/delete',
+        method: 'DELETE',
+        data: JSON.stringify(bookData),
+        contentType: 'application/json',
+        success: data => {
+            var message, modalClass;
+            message = "Операция выполнена успешно!";
+            modalClass = "modal-success";
+            $("#messageText").text(message);
+            $("#messageModal").addClass(modalClass);
+    
+            $("#messageModal").modal("show");
+        },
+        error: error => {
+            var message, modalClass;
+            message = error.responseText;
+            modalClass = "modal-error";
+            $("#messageText").text(message);
+            $("#messageModal").addClass(modalClass);
+    
+            $("#messageModal").modal("show");
+        }
+    });
+}
 
     // $("#showModal").click(function () {
     //     var isSuccess = true; 
