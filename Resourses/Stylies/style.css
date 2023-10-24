@@ -4,21 +4,47 @@
     background: rgb(113, 102, 214);
 }
 
-.modal-content {
+.modal-footer .btn-secondary, 
+.modal-title{
+    color: white;
+}
+
+.modal-edit .modal-content {
+    box-shadow: 0 0 10px 4px blue; 
+}
+
+.modal-edit .modal-header {
+    background-color: #2835a7;
+}
+
+.modal-edit .modal-footer .btn-secondary {
+    background-color: blue; 
+    border: none; 
+}
+
+.modal-edit .modal-footer .btn-secondary:hover {
+    background-color: darkblue;
+}
+
+.modal-success .modal-content {
     box-shadow: 0 0 10px 4px green; 
 }
 
-.modal-footer .btn-secondary {
+.modal-success .modal-header {
+    background-color: #28a745;
+}
+
+.modal-success .modal-footer .btn-secondary {
     background-color: green; 
     border: none; 
 }
 
-.modal-footer .btn-secondary {
-    color: white;
+.modal-success .modal-footer .btn-secondary:hover {
+    background-color: darkgreen;
 }
 
-.modal-footer .btn-secondary:hover {
-    background-color: darkgreen;
+.modal-error .modal-header {
+    background-color: #dc3545;
 }
 
 .modal-error .modal-content {
@@ -28,10 +54,6 @@
 .modal-error .modal-footer .btn-secondary {
     background-color: red; 
     border: none; 
-}
-
-.modal-error .modal-footer .btn-secondary {
-    color: white; 
 }
 
 .modal-error .modal-footer .btn-secondary:hover {

@@ -32,6 +32,7 @@ public static class BookExtension
 
         var bookDto = new BookDTO
         {
+            bookId = book.bookId,
             title = book.title,
             year = book.year,
             author = authorDto,
@@ -45,6 +46,7 @@ public static class BookExtension
     {
         return new Book()
         {
+            bookId = bookDto.bookId,
             title = bookDto.title,
             year = bookDto.year,
             authorId = authorId,

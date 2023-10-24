@@ -1,68 +1,3 @@
-//$(document).ready(function () {
-//    $("#temp").click(function () {
-//        let str = $("#p1").text();
-
-//        $("#p1").text($("#in").val());
-//        $("#in").val(str);
-
-//        $("#div2").text($("#div1").text());
-//        $("#div1").text("");
-//    });
-//});
-
-//let arr = [
-//    {
-//        "id" : "1",
-//        "name" : "Almaty"
-//    },
-//    {
-//        "id": "2",
-//        "name": "Astana"
-//    }
-//];
-
-//$(document).ready(function () {
-//    $("#temp").click(() => {
-//        $('#sel1').empty();
-
-//        for (var i = 0; i < arr.length; i++) {
-//            $("#sel1").append('<option value=' + arr[i].id + '>' + arr[i].name + '</option>');
-//        };
-//    });
-
-//});
-        // $.ajax({
-        //     type: "GET",
-        //     url: "http://localhost:5180/api/author/authors_select",
-        //     success: function (data) {
-        //         $("#author_select").empty();
-
-        //         for (var i = 0; i < data.length; i++) {
-        //             $("#author_select").append('<option value=' + data[i].id + '>' + data[i].name + '</option>');
-        //         }
-        //     },
-        //     error: function (data) {
-        //         console.log("error");
-        //     }
-        // });
-
-        // $.ajax({
-        //     type: "GET",
-        //     url: "http://localhost:5180/api/book/category_select",
-        //     success: function (data) {
-        //         $("#category_select").empty();
-
-        //         for (var i = 0; i < data.length; i++) {
-        //             $("#category_select").append('<option value=' + data[i].id + '>' + data[i].name + '</option>');
-        //         }
-        //     },
-        //     error: function (data) {
-        //         console.log("error");
-        //     }
-        // });
-
-
-
 $(document).ready(function () {
 
     let requestFieldsTable = `
@@ -104,161 +39,152 @@ $(document).ready(function () {
             </tr>
         </table>
     `;
-
+    
     $("#request-container").html(requestFieldsTable);
-    
-    let resonseTable = `
-        <table class="table table-bordered" id="response-table">
-            <tr>
-                <td>Id</td>
-                <td>Title</td>
-                <td>Year</td>
-                <td>Author full name</td>
-                <td>Category</td>
-                <td>Edit</td>
-                <td>Delete</td>
-            </tr>
-    `;
-
-
-    function findAllBooks() {
-            let list = resonseTable;
-        
-            $.ajax({
-                url: 'http://localhost:5180/api/book/all',
-                method: 'GET',
-                success: function(data) {
-                    $.each(data, (i,item) => {
-                        let bookData = {
-                            bookName: item.title,
-                            authorName: item.author.firstName,
-                            categoryName: item.category.name
-                        };
-
-                        let edit  = "<button class='btn btn-primary' onclick='edit(" + 5 + ")'>Edit</button>";
-                        let del = "<button class='btn btn-primary' onclick='del(" + JSON.stringify(bookData) + ")'>Delete</button>";
-    
-                        list += `
-                            <tr>
-                                 <td>` + (i + 1) + `</td>` +
-                                `<td>` + item.title + `</td>` +
-                                `<td>` + item.year + `</td>` +
-                                `<td>` + item.author.firstName + " " + item.author.lastName + `</td>` +
-                                `<td>`+ item.category.name + `</td>` +
-                                `<td>`+ edit + `</td>` +
-                                `<td>`+ del + `</td>` +
-                            `</tr>`;
-    
-                    });
-                    list += `</table>`;
-                    $("#response-container").html(list);
-                },
-            
-                error: function(error) {
-                    console.error('Произошла ошибка:', error);
-                }
-            });
-    }
-
-    function findBookById(id) {
-            let book = resonseTable;
-    
-            let getBookById = 'http://localhost:5180/api/book/';
-
-            if (id == null) {
-                id = $("#id-field").val();
-            }
-    
-            console.log(id);
-            return new Promise(function(resolve, reject) {
-                $.ajax({
-                    url: getBookById + id,
-                    method: 'GET',
-                    success: (data) => {
-                        let bookData = {
-                            title: data.title,
-                            authorName: data.author.firstName,
-                            categoryName: data.category.name
-                        }
-
-                        let edit  = "<button class='btn btn-primary' onclick='edit(" + id + ")'>Edit</button>";
-                        let del = "<button class='btn btn-primary delete-button' data-book='" + JSON.stringify(bookData) + "'>Delete</button>";
-
-                        book += `
-                                <tr>
-                                     <td>` +  1 + `</td>` +
-                                    `<td>` + data.title + `</td>` +
-                                    `<td>` + data.year + `</td>` +
-                                    `<td>` + data.author.firstName + " " + data.author.lastName + `</td>` +
-                                    `<td>`+ data.category.name + `</td>`  +
-                                    `<td>`+ edit + `</td>` +
-                                    `<td>`+ del + `</td>` +
-                                `</tr>`;
-                        book += `</table>`;
-                        $("#response-container").html(book);
-
-                    },
-                
-                    error: (error) => {
-                        console.error('Произошла ошибка:', error);
-                    }
-                });
-            });
-    }
-
-
-
     $("#filling").click( () => {
         findAllBooks();
     });
 
     $("#search-btn").click( () => {
-        findBookById();
+        storeBookToTable();
     }); 
 });
-
-function edit(id) {    
-    findBookById(id)
-        .then(function(data) {
-            $("#title").val(data.title);
-            $("#year").val(data.year);
-            $("#author-first-name").val(data.author.firstName);
-            $("#author-last-name").val(data.author.lastName);
-            $("#category-name").val(data.category.name);
     
-            $("#exampleModal").modal("show");
+let resonseTable = `
+    <table class="table table-bordered" id="response-table">
+        <tr>
+            <td>Id</td>
+            <td>Title</td>
+            <td>Year</td>
+            <td>Author full name</td>
+            <td>Category</td>
+            <td>Edit</td>
+            <td>Delete</td>
+        </tr>
+`;
+
+function findAllBooks() {
+    let list = resonseTable;
+
+    $.ajax({
+        url: 'http://localhost:5180/api/book/all',
+        method: 'GET',
+        success: function(data) {
+            $.each(data, (i,item) => {
+                let edit  = "<button class='btn btn-primary' onclick='edit(" + item.bookId + ")'>Edit</button>";
+                let del = "<button class='btn btn-primary' onclick='del(" + item.bookId + ")'>Delete</button>";
+
+                list += `
+                    <tr>
+                         <td>` + (i + 1) + `</td>` +
+                        `<td>` + item.title + `</td>` +
+                        `<td>` + item.year + `</td>` +
+                        `<td>` + item.author.firstName + " " + item.author.lastName + `</td>` +
+                        `<td>`+ item.category.name + `</td>` +
+                        `<td>`+ edit + `</td>` +
+                        `<td>`+ del + `</td>` +
+                    `</tr>`;
+
+            });
+            list += `</table>`;
+            $("#response-container").html(list);
+        },
+    
+        error: function(error) {
+            console.error('Произошла ошибка:', error);
+        }
+    });
+}
+function findBookById(id) {
+    let getBookById = 'http://localhost:5180/api/book/';
+
+    if (id == null) {
+        id = $("#id-field").val();
+    }
+
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: getBookById + id,
+            method: 'GET',
+            success: (data) => {
+                resolve(data);
+            },
+            error: (error) => {
+                reject(error);
+            }
+        });
+    });
+}
+
+function storeBookToTable() {
+    let book = resonseTable;
+    findBookById()
+        .then( data => {
+            let edit  = "<button class='btn btn-primary' onclick='edit(" + data.bookId + ")'>Edit</button>";
+            let del = "<button class='btn btn-primary' onclick='del(" + data.bookId + ")'>Delete</button>";
+        
+            book += `
+                    <tr>
+                         <td>` + data.bookId + `</td>` +
+                        `<td>` + data.title + `</td>` +
+                        `<td>` + data.year + `</td>` +
+                        `<td>` + data.author.firstName + " " + data.author.lastName + `</td>` +
+                        `<td>`+ data.category.name + `</td>`  +
+                        `<td>`+ edit + `</td>` +
+                        `<td>`+ del + `</td>` +
+                    `</tr>`;
+            book += `</table>`;
+            $("#response-container").html(book);
         })
-        .catch(function(error) {
+        .catch( error => {
             console.error('Произошла ошибка:', error);
         });
 }
 
+function edit(id) {    
+    findBookById(id)
+    .then(function(data) {
+        let modalClass = "modal-edit";
 
-function del(bookData) {
-    $.confirm({
-        title: 'Are you sure to delete book!',
-        content: 'Deletion!',
-        buttons: {
-            confirm: function () {
-                deleteBookByDetails(bookData);
-            },
-            cancel: function () {
-                //$.alert('cancel delete!');
-            }            
-        }
+        $("#edit-title").val(data.title);
+        $("#edit-year").val(data.year);
+        $("#edit-author-firstName").val(data.author.firstName);
+        $("#edit-author-lastName").val(data.author.lastName);
+        $("#edit-category-name").val(data.category.name);
+
+        $("#editModal").addClass(modalClass);
+        $("#editModal").modal("show");
+    })
+    .catch(function(error) {
+        console.error('Произошла ошибка:', error);
+    });
+
+    $("#saveChangesButton").click( () => {
+        updateBook(id);
     });
 }
- 
 
+function updateBook(id) {
+    let updatedBook = {
+        bookId: id,
+        title: $("#edit-title").val(),
+        year: parseInt($("#edit-year").val()),
+        author: {
+            firstName: $("#edit-author-firstName").val(),
+            lastName: $("#edit-author-lastName").val()
+        },
+        category: {
+            name: $("#edit-category-name").val()
+        }
+    };
 
-function deleteBookByDetails(bookData) {
     $.ajax({
-        url: 'http://localhost:5180/api/book/delete',
-        method: 'DELETE',
-        data: JSON.stringify(bookData),
+        url: 'http://localhost:5180/api/book/edit',
+        method: 'PUT',
+        data: JSON.stringify(updatedBook),
         contentType: 'application/json',
         success: data => {
-            var message, modalClass;
+            let message, modalClass;
             message = "Операция выполнена успешно!";
             modalClass = "modal-success";
             $("#messageText").text(message);
@@ -267,7 +193,7 @@ function deleteBookByDetails(bookData) {
             $("#messageModal").modal("show");
         },
         error: error => {
-            var message, modalClass;
+            let message, modalClass;
             message = error.responseText;
             modalClass = "modal-error";
             $("#messageText").text(message);
@@ -278,22 +204,43 @@ function deleteBookByDetails(bookData) {
     });
 }
 
-    // $("#showModal").click(function () {
-    //     var isSuccess = true; 
-
-    //     var message, modalClass;
-    //     if (isSuccess) {
-    //         message = "Операция выполнена успешно!";
-    //         modalClass = "modal-success";
-    //     } else {
-    //         message = "Произошла ошибка при выполнении операции.";
-    //         modalClass = "modal-error";
-    //     }
-
-    //     // Установите сообщение и класс модального окна.
-    //     $("#messageText").text(message);
-    //     $("#messageModal").addClass(modalClass);
-
-    //     // Покажите модальное окно.
-    //     $("#messageModal").modal("show");
-    // });
+function del(id) {
+    $.confirm({
+        title: 'Are you sure to delete book!',
+        content: 'Deletion!',
+        buttons: {
+            confirm: function () {
+                deleteBookByDetails(id);
+            },
+            cancel: function () {
+                //$.alert('cancel delete!');
+            }            
+        }
+    });
+}
+ 
+function deleteBookByDetails(id) {
+    $.ajax({
+        url: 'http://localhost:5180/api/book/delete/' + id,
+        method: 'DELETE',
+        contentType: 'application/json',
+        success: data => {
+            let message, modalClass;
+            message = "Операция выполнена успешно!";
+            modalClass = "modal-success";
+            $("#messageText").text(message);
+            $("#messageModal").addClass(modalClass);
+    
+            $("#messageModal").modal("show");
+        },
+        error: error => {
+            let message, modalClass;
+            message = error.responseText;
+            modalClass = "modal-error";
+            $("#messageText").text(message);
+            $("#messageModal").addClass(modalClass);
+    
+            $("#messageModal").modal("show");
+        }
+    });
+}
