@@ -39,8 +39,9 @@ public class CategoryService
         return _categoryRepository.SaveCategory(newCategory);
     }
 
-    public Result UpdateCategory(Category updatedCategory)
+    public Result UpdateCategory(Category updatedCategory, int categoryId)
     {
+        updatedCategory.categoryId = categoryId;
         return _categoryRepository.UpdateCategory(updatedCategory);
     }
 

@@ -16,8 +16,8 @@ namespace Library.Controllers
         private const string GET_AUTHOR_BY_ID = "{id}";
         private const string GET_AUTHOR_LIST_SELECT = "authors_select";
         private const string POST_SAVE_AUTHOR = "new";
-        private const string PUT_UPDATE_AUTHOR = "edit";
-        private const string DELETE_AUTHOR_BY_ID = "delete";
+        private const string PUT_UPDATE_AUTHOR = "{id}/edit";
+        private const string DELETE_AUTHOR_BY_ID = "{id}/delete";
         
         public AuthorController(AuthorService authorService)
         {
@@ -69,9 +69,9 @@ namespace Library.Controllers
         }
 
         [HttpPut, Route(PUT_UPDATE_AUTHOR)]
-        public IActionResult UpdateAuthor(AuthorDTO authorDto)
+        public IActionResult UpdateAuthor(AuthorDTO authorDto,int id)
         {
-            var result = _authorService.UpdateAuthor(authorDto.ToAuthor());
+            var result = _authorService.UpdateAuthor(authorDto.ToAuthor(), id);
             
             return ResultState<object>(result, null);
         }

@@ -28,8 +28,9 @@ namespace Library.Services
             return _bookRepository.SaveBook(book);
         }
 
-        public Result UpdateBook(Book book)
+        public Result UpdateBook(Book book, int bookId)
         {
+            book.bookId = bookId;
             return _bookRepository.UpdateBook(book);
         }
 

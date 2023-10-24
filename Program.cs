@@ -1,7 +1,16 @@
+using Dapper.FluentMap;
 using Library.Repositories;
 using Library.Services;
+using Library.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+
+FluentMapper.Initialize(config =>
+{
+    config.AddMap(new AuthorMap());
+    config.AddMap(new CategoryMap());
+    config.AddMap(new BookMap());
+});
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -22,9 +31,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        builder =>
+        policyBuilder =>
         {
-            builder.AllowAnyOrigin()
+            policyBuilder.AllowAnyOrigin()
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
         });

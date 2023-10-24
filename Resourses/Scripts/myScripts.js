@@ -61,17 +61,16 @@
         //     }
         // });
 $(document).ready(function () {
-    $("#filling").click(function () {
-       
-        var htmlCode = `
-        <table class="table table-bordered">
+
+    let requestFieldsTable = `
+        <table class="table table-bordered" id="request-fileds">
             <tr>
                 <td>
-                    <button type="submit" class="btn btn-outline-primary" name="send" id="search">Send</button>
+                    <button class="btn btn-outline-primary" name="search" id="search-btn">Send</button>
                     <br>
                     <div class="form-group">
                         <label for="for-id">Input id:</label>
-                        <input type="text" class="form-control" name="for-id" id="for-id">
+                        <input type="number" class="form-control" name="id-field" id="id-field">
                     </div>
                 </td>
                 <td>
@@ -97,41 +96,184 @@ $(document).ready(function () {
                     </div>
                 </td>
                 <td>
-                    <button type="submit" class="btn btn-primary" name="send" id="report">Download report</button>
+                    <button type="submit" class="btn btn-outline-primary" name="send" id="report">Download report</button>
                 </td>
             </tr>
+        </table>
+    `;
 
-        `;
+    $("#request-container").html(requestFieldsTable);
+    
+    let resonseTable = `
+        <table class="table table-bordered" id="response-table">
+            <tr>
+                <td>Id</td>
+                <td>Title</td>
+                <td>Year</td>
+                <td>Author full name</td>
+                <td>Category</td>
+                <td>Edit</td>
+                <td>Delete</td>
+            </tr>
+    `;
 
-//         <tr>
-//         <td colspan="3" rowspan="3" class="empty-space"></td>
-//     </tr>
-// </table>
 
-        $.ajax({
-            url: 'http://localhost:5180/api/book/all',
-            method: 'GET',
-            success: function(data) {
-                $.each(data, (i,item) => {
-                    htmlCode += `
-                        <tr>
-                            <td>` + item.title + `</td>` +
-                            `<td>` + item.year + `</td>` +
-                            `<td>` + item.author.firstName + " " + item.author.firstName `</td>`
-                            `<td>`+ item.category.name + `</td>
-                        </tr>`;
 
-                });
-                htmlCode += `</table>`;
-            },
+    function findAllBooks() {
+            let list = resonseTable;
         
-            error: function(error) {
-                console.error('Произошла ошибка:', error);
-            }
-        });
+            $.ajax({
+                url: 'http://localhost:5180/api/book/all',
+                method: 'GET',
+                success: function(data) {
+                    $.each(data, (i,item) => {
+                        // let bookData = {
+                        //     bookName: item.title,
+                        //     authorName: item.author.firstName,
+                        //     categoryName: item.category.name
+                        // };
 
-        $("#tableBook").html(htmlCode);
+                        let edit  = "<button onclick='edit(" + (i + 1) + ")'>Edit</button>";
+                        let del = "<button onclick=del(" + {
+                            bookName: item.title,
+                            authorName: item.author.firstName,
+                            categoryName: item.category.name
+                        }  + ")'>Delete</button>";
+    
+                        list += `
+                            <tr>
+                                 <td>` + (i + 1) + `</td>` +
+                                `<td>` + item.title + `</td>` +
+                                `<td>` + item.year + `</td>` +
+                                `<td>` + item.author.firstName + " " + item.author.lastName + `</td>` +
+                                `<td>`+ item.category.name + `</td>` +
+                                `<td>`+ edit + `</td>` +
+                                `<td>`+ del + `</td>` +
+                            `</tr>`;
+    
+                    });
+                    list += `</table>`;
+                    $("#response-container").html(list);
+                },
+            
+                error: function(error) {
+                    console.error('Произошла ошибка:', error);
+                }
+            });
+    }
+
+    function findBookById() {
+            let book = resonseTable;
+    
+            let getBookById = 'http://localhost:5180/api/book/';
+            let id = $("#id-field").val();
+    
+            console.log(id);
+            $.ajax({
+                url: getBookById + id,
+                method: 'GET',
+                success: (data) => {
+                    let edit  = "<button onclick='edit(" + id + ")'>Edit</button>";
+                    let del = "<button onclick='del(" + 1 + ")'>Delete</button>";
+                    
+                    book += `
+                            <tr>
+                                 <td>` +  1 + `</td>` +
+                                `<td>` + data.title + `</td>` +
+                                `<td>` + data.year + `</td>` +
+                                `<td>` + data.author.firstName + " " + data.author.lastName + `</td>` +
+                                `<td>`+ data.category.name + `</td>`  +
+                                `<td>`+ edit + `</td>` +
+                                `<td>`+ del + `</td>` +
+                            `</tr>`;
+                    book += `</table>`;
+                    $("#response-container").html(book);
+                },
+            
+                error: (error) => {
+                    console.error('Произошла ошибка:', error);
+                }
+            });
+    }
+
+
+    $("#filling").click( () => {
+        findAllBooks();
     });
+
+    $("#search-btn").click( () => {
+        findBookById();
+    }); 
 });
 
+    function del(bookData) {
+        $.confirm({
+            title: 'Are you sure to delete book!',
+            content: 'Deletion!',
+            buttons: {
+                confirm: function () {
+                    deleteBookById(bookData);
+                
+                },
+                cancel: function () {
+                    //$.alert('cancel delete!');
+                }            
+            }
+        });
+    }
+     
+    
+    function edit(id) {    
+       $("#exampleModal").modal("show");
+    }
+
+    function deleteBookById(bookData) {
+
+
+        $.ajax({
+            url: 'http://localhost:5180/api/book/delete',
+            method: 'DELETE',
+            data: bookData,
+            success: data => {
+                var message, modalClass;
+                message = "Операция выполнена успешно!";
+                modalClass = "modal-success";
+
+                $("#messageText").text(message);
+                $("#messageModal").addClass(modalClass);
         
+                $("#messageModal").modal("show");
+            },
+            error: error => {
+                var message, modalClass;
+                message = "Произошла ошибка при выполнении операции.";
+                modalClass = "modal-error";
+
+                $("#messageText").text(message);
+                $("#messageModal").addClass(modalClass);
+        
+                $("#messageModal").modal("show");
+            }
+        });
+    }
+
+
+    // $("#showModal").click(function () {
+    //     var isSuccess = true; 
+
+    //     var message, modalClass;
+    //     if (isSuccess) {
+    //         message = "Операция выполнена успешно!";
+    //         modalClass = "modal-success";
+    //     } else {
+    //         message = "Произошла ошибка при выполнении операции.";
+    //         modalClass = "modal-error";
+    //     }
+
+    //     // Установите сообщение и класс модального окна.
+    //     $("#messageText").text(message);
+    //     $("#messageModal").addClass(modalClass);
+
+    //     // Покажите модальное окно.
+    //     $("#messageModal").modal("show");
+    // });

@@ -193,7 +193,7 @@ namespace Library.Repositories
             {
                 using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
                 var changedRows = connection.Execute("pUpdateBook", new { 
-                    book.bookId,book.title, book.year, book.authorId, catalogId = book.categoryId 
+                    id = book.bookId,book.title, book.year, book.authorId, catalogId = book.categoryId 
                 }, commandType: CommandType.StoredProcedure);
                 
                 if (changedRows != 0)

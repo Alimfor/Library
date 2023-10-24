@@ -226,7 +226,7 @@ public class AuthorRepository : IAuthorRepository
         try
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-            var changedRows = connection.Execute("pUpdateAuthor", new { author.authorId, author.firstName, author.lastName },
+            var changedRows = connection.Execute("pUpdateAuthor", new { id = author.authorId, author.firstName, author.lastName },
                 commandType: CommandType.StoredProcedure);
 
             if (changedRows != 0)
@@ -262,7 +262,7 @@ public class AuthorRepository : IAuthorRepository
         try
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-            var changedRows = connection.Execute("pDeleteBook", new { id }, commandType: CommandType.StoredProcedure);
+            var changedRows = connection.Execute("pDeleteAuthor", new { id }, commandType: CommandType.StoredProcedure);
             
             if (changedRows != 0)
             {

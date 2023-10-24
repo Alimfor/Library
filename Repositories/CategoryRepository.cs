@@ -225,7 +225,7 @@ public class CategoryRepository : ICategoryRepository
         try
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-            var changedRows = connection.Execute("pUpdateCategory", new { category.categoryId, category.name },
+            var changedRows = connection.Execute("pUpdateCategory", new { id = category.categoryId, category.name },
                 commandType: CommandType.StoredProcedure);
 
             if (changedRows != 0)

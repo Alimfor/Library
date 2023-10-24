@@ -17,7 +17,7 @@ namespace Library.Controllers
 		private const string GET_ALL_BOOKS = "all";
 		private const string GET_BOOK_BY_ID = "{id}";
 		private const string POST_SAVE_BOOK = "new";
-		private const string PUT_UPDATE_BOOK = "edit";
+		private const string PUT_UPDATE_BOOK = "{id}/edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
 
         public BookController(BookService bookService, CategoryService categoryService, AuthorService authorService)
@@ -100,7 +100,7 @@ namespace Library.Controllers
 		}
 
         [HttpPut,Route(PUT_UPDATE_BOOK)]
-        public IActionResult UpdateBook(BookDTO? bookDto)
+        public IActionResult UpdateBook(BookDTO? bookDto,int id)
         {
 	        if (bookDto == null)
 		        return StatusCode(400, "wrong request!");
@@ -118,7 +118,7 @@ namespace Library.Controllers
 	        var authorId = authorOperationResult.data;
 	        var categoryId = categoryOperationResult.data;
 	        
-	        var result = _bookService.UpdateBook(bookDto.ToBook(authorId,categoryId));
+	        var result = _bookService.UpdateBook(bookDto.ToBook(authorId,categoryId),id);
 	        
 	        return ResultState<object>(result, null);
 		}
@@ -237,7 +237,7 @@ CREATE PROC pGetAllOrOneAuthor
 @id INT
 AS
 BEGIN
-	IF @id IS NOT NULL 
+	IF @id <> 0
 	BEGIN
 		SELECT *
 		FROM author

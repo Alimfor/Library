@@ -3,3 +3,37 @@
     height:300px; 
     background: rgb(113, 102, 214);
 }
+
+.modal-content {
+    box-shadow: 0 0 10px 4px green; 
+}
+
+.modal-footer .btn-secondary {
+    background-color: green; 
+    border: none; 
+}
+
+.modal-footer .btn-secondary {
+    color: white;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: darkgreen;
+}
+
+.modal-error .modal-content {
+    box-shadow: 0 0 10px 4px red;
+}
+
+.modal-error .modal-footer .btn-secondary {
+    background-color: red; 
+    border: none; 
+}
+
+.modal-error .modal-footer .btn-secondary {
+    color: white; 
+}
+
+.modal-error .modal-footer .btn-secondary:hover {
+    background-color: darkred;
+}

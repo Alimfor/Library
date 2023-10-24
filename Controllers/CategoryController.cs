@@ -12,19 +12,19 @@ namespace Library.Controllers;
     {
         private readonly CategoryService _categoryService;
 
-        private const string GET_ALL_CATEGORYS = "all";
+        private const string GET_ALL_CATEGORIES = "all";
         private const string GET_CATEGORY_BY_ID = "{id}";
         private const string GET_CATEGORY_LIST_SELECT = "categories_select";
         private const string POST_SAVE_CATEGORY = "new";
-        private const string PUT_UPDATE_CATEGORY = "edit";
-        private const string DELETE_CATEGORY_BY_ID = "delete";
+        private const string PUT_UPDATE_CATEGORY = "{id}/edit";
+        private const string DELETE_CATEGORY_BY_ID = "{id}/delete";
         
         public CategoryController(CategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
-        [Route(GET_ALL_CATEGORYS)]
+        [Route(GET_ALL_CATEGORIES)]
         public IActionResult GetAllCategories()
         {
             var operationResult = _categoryService.GetAllCategories();
@@ -69,9 +69,9 @@ namespace Library.Controllers;
     }
 
         [HttpPut, Route(PUT_UPDATE_CATEGORY)]
-        public IActionResult UpdateCategory(CategoryDTO categoryDto)
+        public IActionResult UpdateCategory(CategoryDTO categoryDto,int id)
         {
-            var result = _categoryService.UpdateCategory(categoryDto.ToCategory());
+            var result = _categoryService.UpdateCategory(categoryDto.ToCategory(), id);
             
             return ResultState<object>(result, null);
     }

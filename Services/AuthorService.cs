@@ -34,8 +34,9 @@ public class AuthorService
         return _authorRepository.SaveAuthor(newAuthor);
     }
 
-    public Result UpdateAuthor(Author updatedAuthor)
+    public Result UpdateAuthor(Author updatedAuthor, int authorId)
     {
+        updatedAuthor.authorId = authorId;
         return _authorRepository.UpdateAuthor(updatedAuthor);
     }
 
