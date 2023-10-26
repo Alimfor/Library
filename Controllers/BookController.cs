@@ -1,4 +1,5 @@
-﻿using Library.DTO;
+﻿using ClosedXML.Excel;
+using Library.DTO;
 using Library.Models;
 using Library.Services;
 using Library.Utils;
@@ -16,6 +17,7 @@ namespace Library.Controllers
 
 		private const string GET_ALL_BOOKS = "all";
 		private const string GET_BOOK_BY_ID = "{id}";
+		private const string GET_XML_REPORT_FORM = "report";
 		private const string POST_SAVE_BOOK = "new";
 		private const string PUT_UPDATE_BOOK = "edit";
 		private const string DELETE_BOOK_BY_BOOK_DETAILS = "delete";
@@ -75,6 +77,34 @@ namespace Library.Controllers
 				? StatusCode(500, "Internal Server Error") 
 				: ResultState(result,bookDto);
         }
+
+        [Route(GET_XML_REPORT_FORM)]
+		public IActionResult GetXmlReport()
+        {
+			byte[] content = null;
+			var result = _bookService.GetAllBooks();
+
+			using (var workbook = new XLWorkbook())
+			{
+				var worksheet = workbook.Worksheets.Add("MySample");
+				worksheet.Cell(1, 1).Value = "id";
+				worksheet.Cell(1, 2).Value = "title";
+				worksheet.Cell(1, 3).Value = "year";
+				worksheet.Cell(1, 4).Value = "fio";
+				worksheet.Cell(1, 5).Value = "category_name";
+
+				worksheet.Cell(2, 1).InsertData(result.data);
+				using (MemoryStream ms = new MemoryStream())
+				{
+					workbook.SaveAs(ms);
+					content = ms.ToArray();
+				}
+			}
+
+			return File(content,
+				 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+				 "Processes.xlsx");
+		}
 
         [HttpPost,Route(POST_SAVE_BOOK)]
         public IActionResult AddBook(BookDTO? bookDto)
@@ -354,10 +384,20 @@ CREATE PROC pGetBookId
 @categoryName NVARCHAR(20)
 AS
 BEGIN
-	SELECT book_id
+    DECLARE @book_id INT
+
+	SELECT @book_id = b.book_id
 	FROM book b JOIN author a
 	ON b.author_id = a.author_id JOIN category c
 	ON b.category_id = c.category_id
+
+    IF @book_id IS NULL
+    BEGIN
+        SET @book_id = -1
+    END
+
+    SELECT @book_id
+
 END
 
 CREATE PROC pGetAuthorIdByFirstAndLastName
@@ -365,9 +405,18 @@ CREATE PROC pGetAuthorIdByFirstAndLastName
 @lastName NVARCHAR(20)
 AS
 BEGIN
-	SELECT author_id
-	FROM author
-	WHERE first_name LIKE @firstName AND last_name LIKE @lastName
+    DECLARE @author_id INT
+
+    SELECT @author_id = author_id
+    FROM author
+    WHERE first_name LIKE @firstName AND last_name LIKE @lastName
+
+    IF @author_id IS NULL
+    BEGIN
+        SET @author_id = -1
+    END
+
+    SELECT @author_id
 END
 
 CREATE PROC pAuthorSelect
@@ -384,5 +433,23 @@ BEGIN
 	SELECT category_id, name
 	FROM category
 	ORDER BY 2
+END
+
+CREATE PROC pGetCategoryIdByName
+@category_name NVARCHAR(20)
+AS
+BEGIN
+    DECLARE @category_id INT
+
+    SELECT @category_id = category_id
+    FROM category
+    WHERE name LIKE @category_name 
+
+    IF @category_id IS NULL
+    BEGIN
+        SET @category_id = -1
+    END
+
+    SELECT @category_id
 END
  */

@@ -102,32 +102,31 @@ public class CategoryRepository : ICategoryRepository
         try
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-            int? categoryId = connection.Query("pGetCategoryIdByName", new { categoryName }, 
+            int categoryId = connection.Query<int>("pGetCategoryIdByName", new { category_name = categoryName }, 
                 commandType: CommandType.StoredProcedure).FirstOrDefault();
             
-            if (categoryId != null)
+            if (categoryId == -1)
             {
                 return new OperationResult<int>()
                 {
-                    data = (int) categoryId,
+                    data = categoryId,
                     result = new Result()
                     {
-                        message = "done",
-                        code = 200,
-                        status = Status.SUCCESSFUL
+                        message = "wrong request",
+                        code = 400,
+                        status = Status.WRONG_REQUEST
                     }
                 };
-                        
             }
-                    
+
             return new OperationResult<int>()
             {
-                data = -1,
+                data = categoryId,
                 result = new Result()
                 {
-                    message = "wrong request",
-                    code = 400,
-                    status = Status.WRONG_REQUEST
+                    message = "done",
+                    code = 200,
+                    status = Status.SUCCESSFUL
                 }
             };
         }

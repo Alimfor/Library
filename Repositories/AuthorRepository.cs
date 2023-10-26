@@ -103,34 +103,35 @@ public class AuthorRepository : IAuthorRepository
         try
         {
             using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-            int? authorId = connection.Query("pGetAuthorIdByFirstAndLastName", new { firstName, lastName},
+            int authorId = connection.Query<int>("pGetAuthorIdByFirstAndLastName", new { firstName, lastName},
                 commandType: CommandType.StoredProcedure).FirstOrDefault();
             
-            if (authorId != null)
+            if (authorId == -1)
             {
                 return new OperationResult<int>()
                 {
-                    data = (int) authorId,
+                    data = authorId,
                     result = new Result()
                     {
-                        message = "done",
-                        code = 200,
-                        status = Status.SUCCESSFUL
+                        message = "wrong request",
+                        code = 400,
+                        status = Status.WRONG_REQUEST
                     }
                 };
-                        
+
             }
-                    
+
             return new OperationResult<int>()
             {
-                data = -1,
+                data = authorId,
                 result = new Result()
                 {
-                    message = "wrong request",
-                    code = 400,
-                    status = Status.WRONG_REQUEST
+                    message = "done",
+                    code = 200,
+                    status = Status.SUCCESSFUL
                 }
             };
+
         }
         catch (Exception ex)
         {

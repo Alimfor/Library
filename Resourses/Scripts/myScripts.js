@@ -4,7 +4,7 @@ $(document).ready(function () {
         <table class="table table-bordered" id="request-fileds">
             <tr>
                 <td>
-                    <button class="btn btn-outline-primary" name="search" id="search-btn">Send</button>
+                    <button class="btn btn-outline-primary" name="search" id="search-btn">Search</button>
                     <br>
                     <div class="form-group">
                         <label for="for-id">Input id:</label>
@@ -34,19 +34,24 @@ $(document).ready(function () {
                     </div>
                 </td>
                 <td>
-                    <button type="submit" class="btn btn-outline-primary" name="send" id="report">Download report</button>
+                    <button class="btn btn-outline-primary" name="report" id="report-btn">Download report</button>
                 </td>
             </tr>
         </table>
     `;
     
     $("#request-container").html(requestFieldsTable);
+
     $("#filling").click( () => {
         findAllBooks();
     });
 
     $("#search-btn").click( () => {
         storeBookToTable();
+    }); 
+
+    $("#report-btn").click( () => {
+        downloadXmlReport();
     }); 
 });
     
@@ -137,8 +142,18 @@ function storeBookToTable() {
             $("#response-container").html(book);
         })
         .catch( error => {
-            console.error('Произошла ошибка:', error);
+            let message, modalClass;
+            message = error.responseText;
+            modalClass = "modal-error";
+            $("#messageText").text(message);
+            $("#messageModal").addClass(modalClass);
+    
+            $("#messageModal").modal("show");
         });
+}
+
+function downloadXmlReport() {
+    window.open("http://localhost:5180/api/book/report");
 }
 
 function edit(id) {    
@@ -168,7 +183,7 @@ function updateBook(id) {
     let updatedBook = {
         bookId: id,
         title: $("#edit-title").val(),
-        year: parseInt($("#edit-year").val()),
+        year: $("#edit-year").val(),
         author: {
             firstName: $("#edit-author-firstName").val(),
             lastName: $("#edit-author-lastName").val()
@@ -191,6 +206,7 @@ function updateBook(id) {
             $("#messageModal").addClass(modalClass);
     
             $("#messageModal").modal("show");
+            findAllBooks();
         },
         error: error => {
             let message, modalClass;
@@ -213,7 +229,6 @@ function del(id) {
                 deleteBookByDetails(id);
             },
             cancel: function () {
-                //$.alert('cancel delete!');
             }            
         }
     });

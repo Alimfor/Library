@@ -102,31 +102,30 @@ namespace Library.Repositories
             try
             {
                 using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
-                int? bookId = connection.Query<int>("pGetBookId", new { bookName, authorName, categoryName },
+                int bookId = connection.Query<int>("pGetBookId", new { bookName, authorName, categoryName },
                     commandType: CommandType.StoredProcedure).FirstOrDefault();
-                if (bookId != null)
+                if (bookId == -1)
                 {
                     return new OperationResult<int>()
                     {
-                        data = (int)bookId,
+                        data = bookId,
                         result = new Result()
                         {
-                            message = "done",
-                            code = 200,
-                            status = Status.SUCCESSFUL
+                            message = "wrong request",
+                            code = 400,
+                            status = Status.WRONG_REQUEST
                         }
                     };
-
                 }
 
                 return new OperationResult<int>()
                 {
-                    data = -1,
+                    data = bookId,
                     result = new Result()
                     {
-                        message = "wrong request",
-                        code = 400,
-                        status = Status.WRONG_REQUEST
+                        message = "done",
+                        code = 200,
+                        status = Status.SUCCESSFUL
                     }
                 };
             }
@@ -193,7 +192,7 @@ namespace Library.Repositories
             {
                 using var connection = new SqlConnection(_configuration.GetConnectionString("conStr"));
                 var changedRows = connection.Execute("pUpdateBook", new { 
-                    id = book.bookId,book.title, book.year, book.authorId, catalogId = book.categoryId 
+                    id = book.bookId,book.title, book.year,author_id = book.authorId, category_id = book.categoryId 
                 }, commandType: CommandType.StoredProcedure);
                 
                 if (changedRows != 0)
